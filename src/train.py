@@ -8,9 +8,11 @@ from utils.logger import get_logger
 from utils.rich_handlers import TrainingHandler, rich_training_context
 import sys 
 import torch
+import os
 from utils.boxes import stacker
 
 if __name__ == '__main__': 
+    os.makedirs("checkpoints", exist_ok=True)
     # Initialize logger and handlers
     logger = get_logger("training")
     logger.print_banner()
