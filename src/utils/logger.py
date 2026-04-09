@@ -2,7 +2,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union, Dict, Any
+from typing import Dict, Any
 
 from rich.console import Console
 from rich.logging import RichHandler

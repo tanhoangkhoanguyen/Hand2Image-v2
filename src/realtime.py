@@ -1,17 +1,22 @@
-import cv2
-import torch
-from torch import load
-from model import DETR
+from pathlib import Path
+
 import albumentations as A
-from utils.boxes import rescale_bboxes
-from utils.setup import get_classes, get_colors
-from utils.logger import get_logger
-from utils.rich_handlers import DetectionHandler, create_detection_live_display
+import cv2
+import io
+import math
+import numpy as np
 import sys
-import time 
+import time
+import torch
 
+from model import DETR
+from utils.boxes import rescale_bboxes
+from utils.logger import get_logger
+from utils.rich_handlers import DetectionHandler
+from utils.setup import get_classes, get_colors
 
-# Initialize logger and handlers
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 logger = get_logger("realtime")
 detection_handler = DetectionHandler()
 
@@ -26,14 +31,19 @@ transforms = A.Compose(
         ]
     )
 
-model = DETR(num_classes=3)
+model = DETR(num_classes=6)
 model.eval()
-model.load_pretrained('pretrained/4426_model.pt')
+model.load_pretrained('checkpoints/149_model.pt')
 CLASSES = get_classes() 
 COLORS = get_colors() 
 
 logger.realtime("Starting camera capture...")
 cap = cv2.VideoCapture(0)
+
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cv2.namedWindow("Frame", cv2.WINDOW_NORMAL)
+cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 # Initialize performance tracking
 frame_count = 0
@@ -57,7 +67,10 @@ while cap.isOpened():
 
     batch_indices, query_indices = torch.where(keep_mask) 
 
-    bboxes = rescale_bboxes(result['pred_boxes'][batch_indices, query_indices,:], (1920,1080))
+    h, w = frame.shape[:2]
+    bboxes = rescale_bboxes(
+        result["pred_boxes"][batch_indices, query_indices, :], (w, h)
+    )
     classes = max_classes[batch_indices, query_indices]
     probas = max_probs[batch_indices, query_indices]
 
@@ -73,7 +86,7 @@ while cap.isOpened():
             'confidence': float(bprob_val),
             'bbox': [float(x1), float(y1), float(x2), float(y2)]
         })
-        
+
         # Draw bounding boxes on frame
         frame = cv2.rectangle(frame, (int(x1),int(y1)), (int(x2),int(y2)), COLORS[bclass_idx], 10)
         frame_text = f"{CLASSES[bclass_idx]} - {round(float(bprob_val),4)}"
@@ -101,4 +114,4 @@ while cap.isOpened():
         break
 
 cap.release() 
-cv2.destroyAllWindows() 
+cv2.destroyAllWindows()

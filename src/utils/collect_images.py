@@ -37,7 +37,7 @@ class CaptureImages():
                 raise Exception("Failed to read from camera")
                 
             image = cv2.putText(frame, f'Capturing {class_name}', (0,100), cv2.FONT_HERSHEY_DUPLEX, 3, (0,0,0), 2, cv2.LINE_AA)
-            cv2.imshow('Image Capture', image)
+            cv2.imshow('', image)
             
             # Generate unique filename
             filename = f'{class_name}-{uuid.uuid1()}.jpg'
@@ -96,4 +96,4 @@ class CaptureImages():
 
 if __name__ == '__main__': 
     cap = CaptureImages('./data/test', classes, 0) 
-    cap.run(num_images=30)
+    cap.run(num_images=50)
