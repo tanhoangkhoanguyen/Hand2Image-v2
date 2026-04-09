@@ -3,8 +3,8 @@ from pathlib import Path
 import albumentations as A
 import cv2
 import io
-import math
 import numpy as np
+import platform
 import sys
 import time
 import torch
@@ -13,7 +13,7 @@ from model import DETR
 from utils.boxes import rescale_bboxes
 from utils.logger import get_logger
 from utils.rich_handlers import DetectionHandler
-from utils.setup import get_classes, get_colors
+from utils.setup import get_classes, get_colors, get_config
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
@@ -23,6 +23,13 @@ detection_handler = DetectionHandler()
 logger.print_banner()
 logger.realtime("Initializing real-time sign language detection...")
 
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+cfg = get_config()
+checkpoint_path = (_PROJECT_ROOT / cfg.get("checkpoint", "pretrained/4426_model.pt")).resolve()
+if not checkpoint_path.is_file():
+    logger.error(f"Checkpoint not found: {checkpoint_path}")
+    sys.exit(1)
+
 transforms = A.Compose(
         [   
             A.Resize(224,224),
@@ -31,25 +38,37 @@ transforms = A.Compose(
         ]
     )
 
-model = DETR(num_classes=6)
+model = DETR(num_classes=len(cfg["classes"]))
 model.eval()
-model.load_pretrained('checkpoints/149_model.pt')
-CLASSES = get_classes() 
-COLORS = get_colors() 
+model.load_pretrained(str(checkpoint_path))
+CLASSES = get_classes()
+COLORS = get_colors()
 
-logger.realtime("Starting camera capture...")
-cap = cv2.VideoCapture(0)
+camera_id = int(cfg.get("camera_id", 0))
+logger.realtime(f"Starting camera capture (device {camera_id})...")
+if platform.system() == "Windows":
+    cap = cv2.VideoCapture(camera_id, cv2.CAP_DSHOW)
+else:
+    cap = cv2.VideoCapture(camera_id)
+
+if not cap.isOpened():
+    logger.error(
+        f"Could not open camera {camera_id}. Set \"camera_id\" in config.json, "
+        "or close other apps using the camera."
+    )
+    sys.exit(1)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 cv2.namedWindow("Frame", cv2.WINDOW_NORMAL)
-cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+if cfg.get("realtime_fullscreen", False):
+    cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 # Initialize performance tracking
 frame_count = 0
 fps_start_time = time.time()
 
-while cap.isOpened(): 
+while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         logger.error("Failed to read frame from camera")

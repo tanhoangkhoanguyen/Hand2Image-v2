@@ -1,9 +1,5 @@
-import sys
-import os
-import time
 from contextlib import contextmanager
 from typing import Optional, Dict, Any, List
-import torch
 from rich.console import Console
 from rich.progress import (
     Progress,
@@ -14,16 +10,15 @@ from rich.progress import (
     TimeElapsedColumn,
     MofNCompleteColumn,
 )
-from rich.panel import Panel
-from rich.table import Table
 from rich.live import Live
 from rich.layout import Layout
-from rich.text import Text
+from rich.panel import Panel
+from rich.table import Table
 
+import torch
 
 class DataLoaderHandler:
     """Rich handler for data loading operations."""
-    
     def __init__(self, console: Console = None):
         self.console = console or Console()
         self.progress = None
@@ -42,7 +37,11 @@ class DataLoaderHandler:
     
     def log_dataset_stats(self, dataset_info: Dict[str, Any]):
         """Display dataset statistics."""
-        table = Table(title="📊 Dataset Statistics", show_header=True, header_style="bold magenta")
+        table = Table(
+            title="📊 Dataset Statistics", 
+            show_header=True, 
+            header_style="bold magenta"
+        )
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="yellow")
         
@@ -61,7 +60,6 @@ class DataLoaderHandler:
             border_style="blue"
         )
         self.console.print(panel)
-
 
 class TrainingHandler:
     """Rich handler for training operations."""
@@ -169,7 +167,6 @@ class TrainingHandler:
             console=self.console,
         )
 
-
 class ModelHandler:
     """Rich handler for model operations."""
     
@@ -205,7 +202,6 @@ class ModelHandler:
         table.add_row("Non-trainable Parameters", f"{total_params - trainable_params:,}")
         
         self.console.print(table)
-
 
 class DetectionHandler:
     """Rich handler for detection operations."""
@@ -246,7 +242,6 @@ class DetectionHandler:
         
         self.console.print(f"[bright_cyan]{timing_info}[/bright_cyan]")
 
-
 class TestHandler:
     """Rich handler for testing operations."""
     
@@ -278,7 +273,6 @@ class TestHandler:
             console=self.console,
         )
 
-
 @contextmanager
 def rich_training_context(console: Console = None):
     """Context manager for rich training display."""
@@ -291,7 +285,6 @@ def rich_training_context(console: Console = None):
         if handler.batch_progress:
             handler.batch_progress.stop()
 
-
 @contextmanager
 def rich_data_context(console: Console = None):
     """Context manager for rich data loading display."""
@@ -301,7 +294,6 @@ def rich_data_context(console: Console = None):
     finally:
         if handler.progress:
             handler.progress.stop()
-
 
 def create_detection_live_display(console: Console = None):
     """Create a live display for real-time detection."""

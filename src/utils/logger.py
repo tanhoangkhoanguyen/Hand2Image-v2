@@ -319,11 +319,6 @@ class SignLanguageLogger:
             console=self.console,
         )
 
-
-# Global logger instance
-logger = SignLanguageLogger()
-
-
 def get_logger(name: str = "sign_language") -> SignLanguageLogger:
     """Get a logger instance."""
     return SignLanguageLogger(name)

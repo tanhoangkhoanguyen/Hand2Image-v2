@@ -12,9 +12,11 @@ detrtest.py
 realtimeimage.py
 data/archive
 
-# data
-checkpoints
+# Data
+# checkpoints
 logs
+.env
+
 # macOS system files
 .DS_Store
 .DS_Store?

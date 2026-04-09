@@ -1,28 +1,45 @@
+from typing import List
+
 import json
 
-def get_classes(): 
-    try: 
-        with open('src/config.json') as f: 
-            config = json.load(f) 
-        classes = config['classes']
-        assert len(classes) > 0, 'You need to specify classes inside of config.json e.g. {"classes":["hello", "iloveyou", "hola"]}'
-        return classes         
-    except Exception as e: 
-        return f'Something went wrong loading your config file: {e}'
+from src.utils.logger import get_logger
 
-def get_colors(): 
-    try: 
-        with open('src/config.json') as f: 
-            config = json.load(f) 
-        classes = config['classes'] 
-        colors = config['colors']
-        assert len(colors) > 0, 'You need to specify colors in RGB inside of config.json e.g. {"colors":[[131, 193, 103], [240, 172, 95]]}'
-        assert len(classes) == len(colors), f'Please specify one color per class. You have {len(colors)} colours and {len(classes)} classes'
-        return colors
-    except Exception as e: 
-        return f'Something went wrong loading your config file: {e}'
-    
-    
-if __name__ == '__main__': 
-    classes = get_classes()
-    print(classes) 
+CONFIG_PATH = "src/utils/config.json"
+CONFIG_DATA = None
+LOGGER = get_logger("setup")
+
+def get_config() -> None:
+    try:
+        global CONFIG_DATA
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            CONFIG_DATA = json.load(f)
+    except Exception as e:
+        LOGGER.error(f"No config data found\n\t{str(e)}")
+        raise
+
+def get_camera_id() -> int:
+    try:
+        if CONFIG_DATA is None:
+            get_config()
+        return CONFIG_DATA["camera_id"]
+    except Exception as e:
+        LOGGER.error(f"No config data found\n\t{str(e)}")
+        raise
+
+def get_classes() -> List[str]:
+    try:
+        if CONFIG_DATA is None:
+            get_config()
+        return CONFIG_DATA["classes"]
+    except Exception as e:
+        LOGGER.error(f"No config data found\n\t{str(e)}")
+        raise
+
+def get_colors() -> List[List[int]]:
+    try:
+        if CONFIG_DATA is None:
+            get_config()
+        return CONFIG_DATA["colors"]
+    except Exception as e:
+        LOGGER.error(f"No config data found\n\t{str(e)}")
+        raise

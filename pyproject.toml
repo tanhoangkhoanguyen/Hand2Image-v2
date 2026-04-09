@@ -5,6 +5,7 @@ description = "A full walkthrough on training a sign language model."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "huggingface_hub>=0.26.0",
     "albumentations>=2.0.8",
     "colorama>=0.4.6",
     "einops>=0.8.1",
