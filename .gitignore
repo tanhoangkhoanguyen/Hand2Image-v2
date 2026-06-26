@@ -12,8 +12,11 @@ detrtest.py
 realtimeimage.py
 data/archive
 
-# data
-checkpoints
+# Data
+# checkpoints
+logs
+.env
+
 # macOS system files
 .DS_Store
 .DS_Store?
@@ -26,3 +29,6 @@ LossAnalysis.ipynb
 .ipynb_checkpoints
 archive
 example_loggers
+
+# dummy files
+untitled.py

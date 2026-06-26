@@ -1,26 +1,30 @@
-import torch
-import numpy as np
-from torch.utils.data import DataLoader, Dataset 
-import os 
+from colorama import Fore 
+from matplotlib import pyplot as plt
 from PIL import Image 
+from torch.utils.data import DataLoader, Dataset
+
 import albumentations as A
 import numpy as np
-from colorama import Fore 
-from matplotlib import pyplot as plt 
-from utils.boxes import rescale_bboxes, stacker
-from utils.setup import get_classes
-from utils.logger import get_logger
-from utils.rich_handlers import DataLoaderHandler
-import sys 
+import os
+import torch
+
+from src.utils.boxes import rescale_bboxes, stacker
+from src.utils.logger import get_logger
+from src.utils.rich_handlers import DataLoaderHandler
+from src.utils.setup import get_classes
 
 
 class DETRData(Dataset): 
-    def __init__(self, path, train=True):
+    def __init__(
+            self, 
+            path: str, 
+            train: bool = True
+        ) -> None:
         super().__init__()
         self.path = path
         self.labels_path = os.path.join(self.path, 'labels')
         self.images_path = os.path.join(self.path, 'images')
-        self.label_files = os.listdir(self.labels_path) 
+        self.label_files = os.listdir(self.labels_path)
         self.labels = list(filter(lambda x: x.endswith('.txt'), self.label_files))
         self.train = train
         

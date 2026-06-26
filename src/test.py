@@ -16,12 +16,12 @@ detection_handler = DetectionHandler()
 
 logger.print_banner()
 
-num_classes = 3
+num_classes = 6
 test_dataset = DETRData('data/test', train=False) 
 test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=4, drop_last=True) 
 model = DETR(num_classes=num_classes)
 model.eval()
-model.load_pretrained('pretrained/4426_model.pt')
+model.load_pretrained('checkpoints/149_model.pt')
 
 X, y = next(iter(test_dataloader))
 
